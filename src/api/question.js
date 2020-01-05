@@ -1,11 +1,5 @@
 // 导入axios接口
 import request from './request'
-import {
-  fchown
-} from 'fs'
-import {
-  EPROTO
-} from 'constants'
 
 // 暴露 题目列表接口
 export function questionList(params) {

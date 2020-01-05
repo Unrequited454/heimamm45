@@ -24,7 +24,12 @@ import {
   TableColumn,
   Table,
   Pagination,
-  DatePicker
+  DatePicker,
+  Cascader,
+  RadioGroup,
+  Radio,
+  Divider,
+  CheckboxGroup
 } from 'element-ui'
 
 Vue.use(Button)
@@ -50,5 +55,10 @@ Vue.use(Table)
 Vue.use(TableColumn)
 Vue.use(Pagination)
 Vue.use(DatePicker)
+Vue.use(Cascader)
+Vue.use(RadioGroup)
+Vue.use(Radio)
+Vue.use(Divider)
+Vue.use(CheckboxGroup)
 Vue.prototype.$message = Message
 Vue.prototype.$confirm = MessageBox.confirm

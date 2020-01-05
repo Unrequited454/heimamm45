@@ -61,7 +61,7 @@
             <el-form-item>
               <el-button type="primary">搜索</el-button>
               <el-button>清除</el-button>
-              <el-button type="primary" icon="el-icon-plus">新增试题</el-button>
+              <el-button type="primary" icon="el-icon-plus" @click="addQuestion">新增试题</el-button>
             </el-form-item>
           </el-col>
         </el-row>
@@ -81,20 +81,55 @@
         <el-table-column label="操作"></el-table-column>
       </el-table>
     </el-card>
+    <!-- 新增试题对话框组件 -->
+    <add-question></add-question>
   </div>
 </template>
 
 <script>
+// 导入新增试题组件
+import addDialog from './components/addDialog.vue'
+import { questionList } from '@/api/question.js'
 export default {
   data() {
     return {
       // 题库表单
-      questionForm: {},
-      questionList: []
+      questionForm: {
+        // 题库名称
+        title: '',
+        // 学科id
+        subject: 0
+      },
+      // 题库列表数据
+      questionList: [],
+      // 新增题目对话框显示状态
+      addDlvisible: false
     }
   },
-  methods: {},
-  created() {}
+  methods: {
+    // 声明发送请求题库数据函数
+    getQuestionList() {
+      questionList().then(res => {
+        console.log('题库列表', res)
+        if (res.code === 200) {
+          this.questionList = res.data.items
+        } else {
+          return this.$message.error('获取题库列表失败')
+        }
+      })
+    },
+    // 新增题库按钮
+    addQuestion() {
+      this.addDlvisible = true
+    }
+  },
+  created() {
+    // 调用题库请求数据函数
+    this.getQuestionList()
+  },
+  components: {
+    'add-question': addDialog
+  }
 }
 </script>
 
