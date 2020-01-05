@@ -33,9 +33,35 @@
         <el-table-column prop="name" label="企业名称" width="180"></el-table-column>
         <el-table-column prop="creater" label="创建者"></el-table-column>
         <el-table-column prop="create_time" label="创建日期"></el-table-column>
-        <el-table-column label="状态"></el-table-column>
-        <el-table-column label="操作"></el-table-column>
+        <el-table-column label="状态">
+          <template slot-scope="scope">
+            <span v-if="scope.row.status===1">启用</span>
+            <span v-else class="forbidden">禁用</span>
+          </template>
+        </el-table-column>
+        <el-table-column label="操作">
+          <template slot-scope="scope">
+            <el-button type="text" @click="editEnterprise(scope.row)">编辑</el-button>
+            <el-button
+              type="text"
+              @click="changeStatus(scope.row)"
+            >{{scope.row.status===1?'启用':'禁用'}}</el-button>
+            <el-button type="text" @click="removeEnterprise(scope.row)">删除</el-button>
+          </template>
+        </el-table-column>
       </el-table>
+      <!-- 分页区域 -->
+      <div class="pagination">
+        <el-pagination
+          @size-change="handleSizeChange"
+          @current-change="handleCurrentChange"
+          :current-page="enterPriseForm.page"
+          :page-sizes="[5, 8, 15, 20]"
+          :page-size="enterPriseForm.limit"
+          layout="total, sizes, prev, pager, next, jumper"
+          :total="total"
+        ></el-pagination>
+      </div>
     </el-card>
     <!-- 新增企业对话框 -->
     <el-dialog center title="新增企业" :visible.sync="addDlVisible" :before-close="cancalAdd">
@@ -70,7 +96,7 @@
 </template>
 
 <script>
-import { enterpriseList, enterpriseAdd } from '@/api/enterprise'
+import { enterpriseList, enterpriseAdd, enterpriseStatus, enterpriseRemove } from '@/api/enterprise'
 export default {
   data() {
     return {
@@ -78,7 +104,7 @@ export default {
       enterPriseForm: {
         name: '',
         page: 1,
-        limit: 10,
+        limit: 8,
         eid: '',
         username: '',
         status: ''
@@ -117,6 +143,7 @@ export default {
         console.log('企业列表：', res)
         if (res.code === 200) {
           this.enterPriseList = res.data.items
+          this.total = res.data.pagination.total
         }
       })
     },
@@ -155,6 +182,51 @@ export default {
           }
         })
       })
+    },
+    // 编辑企业
+    editEnterprise(row) {},
+    // 修改企业状态
+    changeStatus(row) {
+      enterpriseStatus(row.id).then(res => {
+        console.log('企业状态修改：', res)
+        if (res.code === 200) {
+          this.$message.success('状态修改成功')
+          this.getEnterpriseList()
+        } else {
+          return this.$message.error('状态修改失败')
+        }
+      })
+    },
+    // 删除企业
+    async removeEnterprise(row) {
+      let confirmRes = await this.$confirm('此操作将永久删除该企业, 是否继续?', '提示', {
+        confirmButtonText: '确定',
+        cancelButtonText: '取消',
+        type: 'warning'
+      }).catch(err => err)
+      if (confirmRes === 'confirm') {
+        enterpriseRemove(row.id).then(res => {
+          console.log('删除企业：', res)
+          if (res.code === 200) {
+            this.$message.success('删除成功')
+            this.getEnterpriseList()
+          } else {
+            return this.$message.error('删除失败')
+          }
+        })
+      } else {
+        return this.$message.info('已取消删除企业')
+      }
+    },
+    // 分页-页码尺寸改变时触发
+    handleSizeChange(newSize) {
+      this.enterPriseForm.limit = newSize
+      this.getEnterpriseList()
+    },
+    // 分页-当前页码改变时触发
+    handleCurrentChange(newPage) {
+      this.enterPriseForm.page = newPage
+      this.getEnterpriseList()
     }
   },
   created() {
@@ -170,6 +242,11 @@ export default {
   .card-main {
     margin-top: 19px;
   }
+  .pagination {
+    width: 543px;
+    height: 30px;
+    margin: 30px auto 10px;
+  }
   .el-dialog {
     width: 600px;
     height: 508px;
@@ -184,6 +261,9 @@ export default {
     .el-dialog__close {
       color: #fff;
     }
+  }
+  .forbidden {
+    color: red;
   }
 }
 </style>
