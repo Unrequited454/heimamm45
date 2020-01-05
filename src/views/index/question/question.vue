@@ -56,7 +56,7 @@
         <el-row>
           <el-col>
             <el-form-item label="标题">
-              <el-input>查询</el-input>
+              <el-input class="input-title"></el-input>
             </el-form-item>
             <el-form-item>
               <el-button type="primary">搜索</el-button>
@@ -102,6 +102,20 @@ export default {
 .question-container {
   width: 100%;
   height: 100%;
+  .el-card {
+    .el-form-item {
+      margin-right: 30px;
+    }
+    .el-form-item__label {
+      padding-right: 30px;
+    }
+    .el-input {
+      width: 150px;
+    }
+    .input-title {
+      width: 388px;
+    }
+  }
   .card-main {
     margin-top: 19px;
   }
