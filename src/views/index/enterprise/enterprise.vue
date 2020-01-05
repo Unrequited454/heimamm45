@@ -37,10 +37,40 @@
         <el-table-column label="操作"></el-table-column>
       </el-table>
     </el-card>
+    <!-- 新增企业对话框 -->
+    <el-dialog center title="新增企业" :visible.sync="addDlVisible" :before-close="cancalAdd">
+      <el-form
+        ref="addEnterpriseRef"
+        :rules="addEnterpriseRul"
+        :model="addEnterpriseForm"
+        label-width="80px"
+      >
+        <el-form-item label="企业编号" prop="eid">
+          <el-input v-model="addEnterpriseForm.eid"></el-input>
+        </el-form-item>
+        <el-form-item label="企业名称" prop="name">
+          <el-input v-model="addEnterpriseForm.name"></el-input>
+        </el-form-item>
+        <el-form-item label="企业简称" prop="short_name">
+          <el-input v-model="addEnterpriseForm.short_name"></el-input>
+        </el-form-item>
+        <el-form-item label="企业简介" prop="intro">
+          <el-input type="textarea" v-model="addEnterpriseForm.intro"></el-input>
+        </el-form-item>
+        <el-form-item label="企业备注" prop="remark">
+          <el-input v-model="addEnterpriseForm.remark"></el-input>
+        </el-form-item>
+      </el-form>
+      <span slot="footer" class="dialog-footer">
+        <el-button @click="cancalAdd">取 消</el-button>
+        <el-button type="primary" @click="ensureAdd">确 定</el-button>
+      </span>
+    </el-dialog>
   </div>
 </template>
 
 <script>
+import { enterpriseList, enterpriseAdd } from '@/api/enterprise'
 export default {
   data() {
     return {
@@ -54,10 +84,42 @@ export default {
         status: ''
       },
       // 企业数据列表
-      enterPriseList: []
+      enterPriseList: [],
+      // 企业列表总条数
+      total: 0,
+      // 新增企业对话框显示状态
+      addDlVisible: false,
+      // 新增企业请求参数对象
+      addEnterpriseForm: {
+        // 企业编号
+        eid: '',
+        // 企业名称
+        name: '',
+        // 企业简称
+        short_name: '',
+        // 企业简介
+        intro: '',
+        // 备注
+        remark: ''
+      },
+      // 新增企业表单验证
+      addEnterpriseRul: {
+        eid: [{ required: true, message: '请输入企业编号', trigger: 'blur' }],
+        name: [{ required: true, message: '请输入企业名称', trigger: 'blur' }],
+        short_name: [{ required: true, message: '请输入企业简介', trigger: 'blur' }]
+      }
     }
   },
   methods: {
+    // 声明请求企业列表数据函数
+    getEnterpriseList() {
+      enterpriseList(this.enterPriseForm).then(res => {
+        console.log('企业列表：', res)
+        if (res.code === 200) {
+          this.enterPriseList = res.data.items
+        }
+      })
+    },
     // 搜索
     search() {},
     // 清除
@@ -65,9 +127,36 @@ export default {
       this.$refs.enterPriseRef.resetFields()
     },
     // 新增企业
-    addEnterPrise() {}
+    addEnterPrise() {
+      this.addDlVisible = true
+    },
+    // 取消新增企业
+    cancalAdd() {
+      this.addDlVisible = false
+    },
+    // 确定新增企业
+    ensureAdd() {
+      this.$refs.addEnterpriseRef.validate(valid => {
+        if (!valid) {
+          return this.$message.warning('请填写完整企业信息')
+        }
+        enterpriseAdd(this.addEnterpriseForm).then(res => {
+          console.log('添加企业：', res)
+          if (res.code === 200) {
+            this.addDlVisible = false
+            this.$message.success('企业新增成功')
+            this.getEnterpriseList()
+            this.$refs.addEnterpriseRef.resetFields()
+          } else {
+            return this.$message.warning('企业新增失败')
+          }
+        })
+      })
+    }
   },
-  created() {}
+  created() {
+    this.getEnterpriseList()
+  }
 }
 </script>
 
@@ -77,6 +166,21 @@ export default {
   height: 100%;
   .card-main {
     margin-top: 19px;
+  }
+  .el-dialog {
+    width: 600px;
+    height: 508px;
+    // 顶部颜色
+    .el-dialog__header {
+      color: #fff;
+      background: linear-gradient(225deg, rgba(1, 198, 250, 1), rgba(20, 147, 250, 1));
+    }
+    .el-dialog__title {
+      color: #fff;
+    }
+    .el-dialog__close {
+      color: #fff;
+    }
   }
 }
 </style>
