@@ -121,10 +121,13 @@ export default {
       })
     },
     // 搜索
-    search() {},
+    search() {
+      this.getEnterpriseList()
+    },
     // 清除
     resetForm() {
       this.$refs.enterPriseRef.resetFields()
+      this.getEnterpriseList()
     },
     // 新增企业
     addEnterPrise() {
