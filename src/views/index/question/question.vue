@@ -2,65 +2,76 @@
   <div class="question-container">
     <!-- 头部 卡片区域 -->
     <el-card>
-      <el-form :inline="true" :model="questionForm" class="demo-form-inline">
+      <el-form :inline="true" ref="questionRef" :model="questionForm" class="demo-form-inline">
         <el-row>
           <el-col>
-            <el-form-item label="学科">
-              <el-select v-model="questionForm.region" placeholder="请选择学科">
-                <el-option label="区域一" value="shanghai"></el-option>
-                <el-option label="区域二" value="beijing"></el-option>
+            <el-form-item label="学科" prop="subject">
+              <el-select v-model="questionForm.subject" placeholder="请选择学科">
+                <el-option
+                  v-for="(item, index) in subjectData"
+                  :key="index"
+                  :label="item.name"
+                  :value="item.id"
+                ></el-option>
               </el-select>
             </el-form-item>
-            <el-form-item label="阶段">
-              <el-select v-model="questionForm.region" placeholder="请选择阶段">
-                <el-option label="区域一" value="shanghai"></el-option>
-                <el-option label="区域二" value="beijing"></el-option>
+            <el-form-item label="阶段" prop="step">
+              <el-select v-model="questionForm.step" placeholder="请选择阶段">
+                <el-option label="初级" value="1"></el-option>
+                <el-option label="中级" value="2"></el-option>
+                <el-option label="高级" value="3"></el-option>
               </el-select>
             </el-form-item>
-            <el-form-item label="企业">
-              <el-select v-model="questionForm.region" placeholder="请选择企业">
-                <el-option label="区域一" value="shanghai"></el-option>
-                <el-option label="区域二" value="beijing"></el-option>
+            <el-form-item label="企业" prop="enterprise">
+              <el-select v-model="questionForm.enterprise" placeholder="请选择企业">
+                <el-option
+                  v-for="(item, index) in enterpriseData"
+                  :key="index"
+                  :label="item.name"
+                  :value="item.id"
+                ></el-option>
               </el-select>
             </el-form-item>
-            <el-form-item label="题型">
-              <el-select v-model="questionForm.region" placeholder="请选择题型">
-                <el-option label="区域一" value="shanghai"></el-option>
-                <el-option label="区域二" value="beijing"></el-option>
+            <el-form-item label="题型" prop="type">
+              <el-select v-model="questionForm.type" placeholder="请选择题型">
+                <el-option label="单选" value="1"></el-option>
+                <el-option label="多选" value="2"></el-option>
+                <el-option label="简单" value="3"></el-option>
               </el-select>
             </el-form-item>
           </el-col>
         </el-row>
         <el-row>
           <el-col>
-            <el-form-item label="难度">
-              <el-select v-model="questionForm.region" placeholder="请选择难度">
-                <el-option label="区域一" value="shanghai"></el-option>
-                <el-option label="区域二" value="beijing"></el-option>
+            <el-form-item label="难度" prop="difficulty">
+              <el-select v-model="questionForm.difficulty" placeholder="请选择难度">
+                <el-option label="简单" value="1"></el-option>
+                <el-option label="一般" value="2"></el-option>
+                <el-option label="困难" value="3"></el-option>
               </el-select>
             </el-form-item>
-            <el-form-item label="作者">
-              <el-input v-model="questionForm.user"></el-input>
+            <el-form-item label="作者" prop="username">
+              <el-input v-model="questionForm.username"></el-input>
             </el-form-item>
-            <el-form-item label="状态">
-              <el-select v-model="questionForm.region" placeholder="请选择状态">
-                <el-option label="启用" :value="1"></el-option>
-                <el-option label="禁用" :value="0"></el-option>
+            <el-form-item label="状态" prop="status">
+              <el-select v-model="questionForm.status" placeholder="请选择状态">
+                <el-option label="启用" value="1"></el-option>
+                <el-option label="禁用" value="0"></el-option>
               </el-select>
             </el-form-item>
-            <el-form-item label="日期">
-              <el-date-picker v-model="questionForm.date" type="date" placeholder="选择日期"></el-date-picker>
+            <el-form-item label="日期" prop="create_date">
+              <el-date-picker v-model="questionForm.create_date" type="date" placeholder="选择日期"></el-date-picker>
             </el-form-item>
           </el-col>
         </el-row>
         <el-row>
           <el-col>
-            <el-form-item label="标题">
-              <el-input class="input-title"></el-input>
+            <el-form-item label="标题" prop="title">
+              <el-input class="input-title" v-model="questionForm.title"></el-input>
             </el-form-item>
             <el-form-item>
-              <el-button type="primary">搜索</el-button>
-              <el-button>清除</el-button>
+              <el-button type="primary" @click="search">搜索</el-button>
+              <el-button @click="reset">清除</el-button>
               <el-button type="primary" icon="el-icon-plus" @click="addQuestion">新增试题</el-button>
             </el-form-item>
           </el-col>
@@ -69,17 +80,54 @@
     </el-card>
     <!-- 主体 卡片区域 -->
     <el-card class="card-main">
-      <el-table :data="questionList" style="width: 100%">
-        <el-table-column type="index" label="序号"></el-table-column>
-        <el-table-column prop="eid" label="题目" width="180"></el-table-column>
-        <el-table-column prop="name" label="学科、阶段" width="180"></el-table-column>
-        <el-table-column prop="creater" label="题型"></el-table-column>
-        <el-table-column prop="create_time" label="企业"></el-table-column>
-        <el-table-column label="创建者"></el-table-column>
-        <el-table-column label="状态"></el-table-column>
-        <el-table-column label="访问量"></el-table-column>
-        <el-table-column label="操作"></el-table-column>
+      <el-table :data="questionData" style="width: 100%" border>
+        <el-table-column type="index" label="序号" width="100"></el-table-column>
+        <el-table-column prop="title" label="题目" width="180">
+          <template slot-scope="scope">
+            <span v-html="scope.row.title"></span>
+          </template>
+        </el-table-column>
+        <el-table-column label="学科、阶段" width="180">
+          <template slot-scope="scope">
+            <span>{{scope.row.subject_name + '.' + {1: '初级', 2: '中级', 3: '高级'}[scope.row.step]}}</span>
+          </template>
+        </el-table-column>
+        <el-table-column label="题型">
+          <template slot-scope="scope">
+            <span>{{{1: '单选', 2: '多选', 3: '简答'}[scope.row.type]}}</span>
+          </template>
+        </el-table-column>
+        <el-table-column prop="enterprise_name" label="企业"></el-table-column>
+        <el-table-column prop="username" label="创建者"></el-table-column>
+        <el-table-column label="状态">
+          <template slot-scope="scope">
+            <span v-if="scope.row.status===1">启用</span>
+            <span v-else class="forbidden">禁用</span>
+          </template>
+        </el-table-column>
+        <el-table-column prop="reads" label="访问量"></el-table-column>
+        <el-table-column label="操作">
+          <template slot-scope="scope">
+            <el-button type="text">编辑</el-button>
+            <el-button
+              type="text"
+              @click="changeStatus(scope.row)"
+            >{{scope.row.status===1?'启用':'禁用'}}</el-button>
+            <el-button type="text" @click="removeQuestion(scope.row)">删除</el-button>
+          </template>
+        </el-table-column>
       </el-table>
+      <div class="pagination">
+        <el-pagination
+          @size-change="handleSizeChange"
+          @current-change="handleCurrentChange"
+          :current-page="questionForm.page"
+          :page-sizes="[5, 10, 16, 22]"
+          :page-size="questionForm.limit"
+          layout="total, sizes, prev, pager, next, jumper"
+          :total="total"
+        ></el-pagination>
+      </div>
     </el-card>
     <!-- 新增试题对话框组件 -->
     <add-question></add-question>
@@ -89,41 +137,128 @@
 <script>
 // 导入新增试题组件
 import addDialog from './components/addDialog.vue'
-import { questionList } from '@/api/question.js'
+import { questionList, questionRemove, questionStatus } from '@/api/question.js'
+// 导入subject
+import { subjectList } from '@/api/subject.js'
+// 导入enterprise
+import { enterpriseList } from '@/api/enterprise.js'
 export default {
   data() {
     return {
       // 题库表单
       questionForm: {
-        // 题库名称
-        title: '',
-        // 学科id
-        subject: 0
+        // 页码，默认为1
+        page: 1,
+        // 页尺寸，默认为10
+        limit: 10
       },
+      // 学科数据
+      subjectData: [],
+      // 企业数据
+      enterpriseData: [],
       // 题库列表数据
-      questionList: [],
+      questionData: [],
+      // 题库列表总条数
+      total: 0,
       // 新增题目对话框显示状态
       addDlvisible: false
     }
   },
   methods: {
+    // 声明发送请求获取学科数据函数
+    getSubjectList() {
+      subjectList().then(res => {
+        console.log('试题列表获取学科数据：', res)
+        if (res.code === 200) {
+          this.subjectData = res.data.items
+        } else {
+          return this.$$message.error('获取学科数据列表失败！')
+        }
+      })
+    },
+    // 声明发送请求获取企业数据函数
+    getEnterpriseList() {
+      enterpriseList().then(res => {
+        console.log('试题列表中企业数据：', res)
+        if (res.code === 200) {
+          this.enterpriseData = res.data.items
+        }
+      })
+    },
     // 声明发送请求题库数据函数
     getQuestionList() {
-      questionList().then(res => {
+      questionList(this.questionForm).then(res => {
         console.log('题库列表', res)
         if (res.code === 200) {
-          this.questionList = res.data.items
+          this.questionData = res.data.items
+          this.total = res.data.pagination.total
         } else {
           return this.$message.error('获取题库列表失败')
         }
       })
     },
+    // 搜索题型按钮
+    search() {
+      this.questionForm.page = 1
+      this.getQuestionList()
+    },
+    // 清除题型搜索
+    reset() {
+      this.$refs.questionRef.resetFields()
+      this.questionForm.page = 1
+      this.getQuestionList()
+    },
     // 新增题库按钮
     addQuestion() {
       this.addDlvisible = true
+    },
+    // 删除题型按钮
+    async removeQuestion(row) {
+      let confirmRes = await this.$confirm('是否永久删除该题型', '提示', {
+        confirmButtonText: '确定',
+        cancelButtonText: '取消',
+        type: 'warning'
+      }).catch(err => err)
+      if (confirmRes === 'confirm') {
+        questionRemove(row.id).then(res => {
+          if (res.code === 200) {
+            this.$message.success('删除成功')
+            this.getQuestionList()
+          } else {
+            return this.$message.error('删除失败')
+          }
+        })
+      } else {
+        return this.$message.info('已取消删除')
+      }
+    },
+    // 改变题型状态
+    changeStatus(row) {
+      questionStatus(row.id).then(res => {
+        if (res.code === 200) {
+          this.$message.success('状态更改成功')
+          this.getQuestionList()
+        } else {
+          return this.$message.error('状态更改失败')
+        }
+      })
+    },
+    // 分页-页尺寸改变触发
+    handleSizeChange(newSize) {
+      this.questionForm.limit = newSize
+      this.getQuestionList()
+    },
+    // 分页-当前页码改变触发
+    handleCurrentChange(newPage) {
+      this.questionForm.page = newPage
+      this.getQuestionList()
     }
   },
   created() {
+    // 调用学科请求数据函数
+    this.getSubjectList()
+    // 调用企业请求数据函数
+    this.getEnterpriseList()
     // 调用题库请求数据函数
     this.getQuestionList()
   },
@@ -140,19 +275,27 @@ export default {
   .el-card {
     .el-form-item {
       margin-right: 30px;
+      .el-input {
+        width: 150px;
+      }
+      .input-title {
+        width: 388px;
+      }
     }
     .el-form-item__label {
       padding-right: 30px;
     }
-    .el-input {
-      width: 150px;
-    }
-    .input-title {
-      width: 388px;
-    }
   }
   .card-main {
     margin-top: 19px;
+  }
+  .pagination {
+    width: 543px;
+    height: 30px;
+    margin: 30px auto 10px;
+  }
+  .forbidden {
+    color: red;
   }
 }
 </style>

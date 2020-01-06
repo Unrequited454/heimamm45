@@ -208,14 +208,14 @@ export default {
     // 视频上传之前删除触发
     beforeRemove() {}
   },
-  created() {}
+  created() {
+  }
 }
 </script>
 
 <style lang="less">
 .add-question {
   width: 100%;
-  height: 100%;
   // 对话框头部样式
   .el-dialog__header {
     color: #fff;

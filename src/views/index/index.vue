@@ -117,6 +117,8 @@ export default {
 .index-container {
   width: 100%;
   height: 100%;
+  // TODO:隐藏子盒子滚动条
+  overflow: auto;
   // 头部样式
   .el-header {
     display: flex;
