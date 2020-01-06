@@ -9,13 +9,7 @@
       :before-close="cancalAdd"
     >
       <!-- 表单区域 -->
-      <el-form
-        ref="addQuestionRef"
-        :model="addQuestionForm"
-        :rules="addQuestionRul"
-        label-width="80px"
-        label-position="left"
-      >
+      <el-form ref="addQuestionRef" :model="addQuestionForm" :rules="addQuestionRul">
         <el-form-item label="学科" prop="subject">
           <el-select v-model="addQuestionForm.subject" placeholder="请选择学科">
             <el-option label="区域一" value="shanghai"></el-option>
@@ -50,7 +44,7 @@
             <el-radio :label="3">简答</el-radio>
           </el-radio-group>
         </el-form-item>
-        <el-form-item label="难度">
+        <el-form-item label="难度" prop="difficulty">
           <el-radio-group v-model="addQuestionForm.difficulty">
             <el-radio :label="1">简单</el-radio>
             <el-radio :label="2">一般</el-radio>
@@ -59,15 +53,14 @@
         </el-form-item>
         <el-divider></el-divider>
         <!-- 试题标题区域 -->
-        <el-form-item label="试题标题" prop="title">
-          <quill-editor v-model="addQuestionForm.title" ref="myQuillEditor"></quill-editor>
-        </el-form-item>
+        <el-form-item label="试题标题" prop="title"></el-form-item>
+        <quill-editor v-model="addQuestionForm.title" ref="myQuillEditor"></quill-editor>
         <!-- 单选区域 -->
-        <el-form-item label="单选">
-          <el-checkbox-group v-model="addQuestionForm">
+        <el-form-item label="单选" prop="single_select_answer">
+          <el-radio-group v-model="addQuestionForm.single_select_answer">
             <div class="raido-box">
-              <el-checkbox label="A"></el-checkbox>
-              <el-input v-model="addQuestionForm" placeholder></el-input>
+              <el-radio label="A"></el-radio>
+              <el-input placeholder></el-input>
               <el-upload
                 class="avatar-uploader"
                 action="uploadAction"
@@ -79,10 +72,49 @@
                 <i v-else class="el-icon-plus avatar-uploader-icon"></i>
               </el-upload>
             </div>
-            <el-checkbox label="B"></el-checkbox>
-            <el-checkbox label="C"></el-checkbox>
-            <el-checkbox label="D"></el-checkbox>
-          </el-checkbox-group>
+            <div class="raido-box">
+              <el-radio label="B"></el-radio>
+              <el-input placeholder></el-input>
+              <el-upload
+                class="avatar-uploader"
+                action="uploadAction"
+                :show-file-list="false"
+                :on-success="handleAvatarSuccess"
+                :before-upload="beforeAvatarUpload"
+              >
+                <img v-if="imageUrl" :src="imageUrl" class="avatar" />
+                <i v-else class="el-icon-plus avatar-uploader-icon"></i>
+              </el-upload>
+            </div>
+            <div class="raido-box">
+              <el-radio label="C"></el-radio>
+              <el-input placeholder></el-input>
+              <el-upload
+                class="avatar-uploader"
+                action="uploadAction"
+                :show-file-list="false"
+                :on-success="handleAvatarSuccess"
+                :before-upload="beforeAvatarUpload"
+              >
+                <img v-if="imageUrl" :src="imageUrl" class="avatar" />
+                <i v-else class="el-icon-plus avatar-uploader-icon"></i>
+              </el-upload>
+            </div>
+            <div class="raido-box">
+              <el-radio label="D"></el-radio>
+              <el-input placeholder></el-input>
+              <el-upload
+                class="avatar-uploader"
+                action="uploadAction"
+                :show-file-list="false"
+                :on-success="handleAvatarSuccess"
+                :before-upload="beforeAvatarUpload"
+              >
+                <img v-if="imageUrl" :src="imageUrl" class="avatar" />
+                <i v-else class="el-icon-plus avatar-uploader-icon"></i>
+              </el-upload>
+            </div>
+          </el-radio-group>
         </el-form-item>
         <el-divider></el-divider>
         <!-- 视频上传区域 -->
@@ -99,18 +131,17 @@
             :file-list="fileList"
           >
             <el-button size="small" type="primary">点击上传</el-button>
-            <div slot="tip" class="el-upload__tip">只能上传jpg/png文件，且不超过500kb</div>
+            <div slot="tip" class="el-upload__tip">只能上传视频格式文件</div>
           </el-upload>
         </el-form-item>
         <el-divider></el-divider>
         <!-- 答案解析区域 -->
-        <el-form-item label="答案解析">
-          <el-input type="textarea"></el-input>
-        </el-form-item>
-        <el-divider></el-divider>
+        <el-form-item label="答案解析" prop="asnwer_analyze"></el-form-item>
+        <quill-editor v-model="addQuestionForm.asnwer_analyze" ref="myQuillEditor"></quill-editor>
+        <el-divider class="divider"></el-divider>
         <!-- 试题备注区域 -->
-        <el-form-item label="试题解析">
-          <el-input type="textarea"></el-input>
+        <el-form-item label="试题备注" prop="remark">
+          <el-input type="textarea" v-model="addQuestionForm.remark"></el-input>
         </el-form-item>
       </el-form>
       <span slot="footer" class="dialog-footer">
@@ -145,7 +176,13 @@ export default {
         // 难度
         difficulty: [{ required: true, message: '请选择难度', trigger: 'blur' }],
         // 标题
-        title: [{ required: true, message: '请输入试题标题', trigger: 'blur' }]
+        title: [{ required: true, message: '请输入试题标题', trigger: 'blur' }],
+        // 单选
+        single_select_answer: [{ required: true, message: '请选择单选答案', trigger: 'blur' }],
+        // 答案解析
+        asnwer_analyze: [{ required: true, message: '请填写答案解析', trigger: 'blur' }],
+        // 试题备注
+        remark: [{ required: true, message: '请输入试题备注', trigger: 'blur' }]
       },
       // 级联选择器城市数据源
       cityOptions: regionDataPlus,
@@ -190,14 +227,41 @@ export default {
   .el-dialog__title {
     color: #fff;
   }
-  // 让表单居中
+  // 表单居中
   .el-dialog__body {
     display: flex;
     justify-content: center;
   }
+  // 表单标签与输入框间隙
+  .el-form-item__label {
+    padding-right: 40px;
+  }
   // 下拉选项框样式
   .el-input {
     width: 364px;
+  }
+  // 富文本样式
+  .quill-editor {
+    width: 835px;
+    height: 68px;
+    margin-bottom: 100px;
+  }
+  // 单选区域样式
+  .raido-box {
+    display: flex;
+    align-items: center;
+    .el-input {
+      width: 476px;
+    }
+  }
+  // 分割线样式
+  .el-divider--horizontal {
+    margin: 36px 0;
+  }
+  // 最后一分割线样式
+  .divider {
+    height: 2px;
+    margin-top: 128px;
   }
   // 上传头像样式
   .avatar-uploader .el-upload {
@@ -205,6 +269,7 @@ export default {
     border-radius: 6px;
     cursor: pointer;
     position: relative;
+    margin: 0 0 45px 20px;
     overflow: hidden;
   }
   .avatar-uploader .el-upload:hover {
@@ -218,12 +283,12 @@ export default {
     line-height: 178px;
     text-align: center;
   }
-  .avatar {
-    width: 178px;
-    height: 178px;
-    display: block;
+  // 视频解析样式
+  .el-upload__tip {
+    margin-left: 92px;
   }
 }
+// 级联选择器样式
 .el-cascader-panel {
   height: 200px;
 }
