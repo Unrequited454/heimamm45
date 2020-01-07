@@ -10,7 +10,7 @@ export function dataTitle() {
 }
 
 // 企业题目统计
-export function dataQuestion() {
+export function dataEnterprise() {
   return request({
     url: '/data/statistics',
     method: 'post'
