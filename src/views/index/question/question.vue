@@ -172,7 +172,7 @@ export default {
         if (res.code === 200) {
           this.subjectData = res.data.items
         } else {
-          return this.$$message.error('获取学科数据列表失败！')
+          return this.$message.error('获取学科数据列表失败！')
         }
       })
     },
