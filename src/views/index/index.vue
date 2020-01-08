@@ -6,44 +6,33 @@
           <span class="icon" @click="collapse">
             <i class="el-icon-s-operation"></i>
           </span>
-          <img class="logo" src="../../assets/logo_b.png" alt />
+          <img class="logo" src="../../assets/logo_b.png" />
           <span class="title-desc">黑马面面</span>
         </div>
         <div class="user-info">
-          <img class="avatay" :src="userInfo.avatar" alt />
+          <img class="avatay" :src="userInfo.avatar" />
           <span class="info">{{userInfo.username}}，你好</span>
           <el-button type="primary" size="small" @click="logoutBtn">退出</el-button>
         </div>
       </el-header>
       <el-container>
-        <el-aside :width="isCollapse?'64px':'201px'">
+        <el-aside width="auto">
           <el-menu
-            :collapse-transition="false"
             :collapse="isCollapse"
-            default-active="subject"
+            :default-active="$route.path"
             class="el-menu-vertical-demo"
             router
           >
-            <el-menu-item index="chart">
-              <i class="el-icon-pie-chart"></i>
-              <span slot="title">数据预览</span>
-            </el-menu-item>
-            <el-menu-item index="user">
-              <i class="el-icon-user"></i>
-              <span slot="title">用户列表</span>
-            </el-menu-item>
-            <el-menu-item index="question">
-              <i class="el-icon-edit-outline"></i>
-              <span slot="title">题库列表</span>
-            </el-menu-item>
-            <el-menu-item index="enterprise">
-              <i class="el-icon-office-building"></i>
-              <span slot="title">企业列表</span>
-            </el-menu-item>
-            <el-menu-item index="subject">
-              <i class="el-icon-notebook-2"></i>
-              <span slot="title">学科列表</span>
-            </el-menu-item>
+            <template v-for="(item, index) in routes[2].children">
+              <el-menu-item
+                v-if="item.meta.roles.includes($store.state.userInfo.role)"
+                :index="item.meta.fullPath"
+                :key="index"
+              >
+                <i :class="item.meta.icon"></i>
+                <span slot="title">{{item.meta.title}}</span>
+              </el-menu-item>
+            </template>
           </el-menu>
         </el-aside>
         <el-main>
@@ -57,11 +46,14 @@
 <script>
 import { removeToken } from '@/utils/token.js'
 import { logout, userinfo } from '@/api/login.js'
+import routes from '@/router/routes.js'
 export default {
   data() {
     return {
       // 侧边栏是否折叠
-      isCollapse: false
+      isCollapse: false,
+      // 路由信息
+      routes
     }
   },
   methods: {
@@ -77,7 +69,6 @@ export default {
         return this.$message.info('已取消退出登录')
       }
       logout().then(res => {
-        console.log('退出登录:', res)
         if (res.code === 200) {
           this.$message.success('已退出登录')
           this.$router.push('/login')
@@ -91,8 +82,9 @@ export default {
       userinfo().then(res => {
         console.log('用户信息：', res)
         if (res.code === 200) {
+          // 给图片设置基地址
+          res.data.avatar = `${process.env.VUE_APP_BASEURL}/${res.data.avatar}`
           this.$store.commit('setInfo', res.data)
-          console.log(this.$store.state.userInfo)
         }
       })
     },
@@ -117,8 +109,6 @@ export default {
 .index-container {
   width: 100%;
   height: 100%;
-  // TODO:隐藏子盒子滚动条
-  overflow: auto;
   // 头部样式
   .el-header {
     display: flex;
@@ -158,6 +148,10 @@ export default {
   // 侧边栏样式
   .el-container {
     height: 100%;
+    .el-menu-vertical-demo:not(.el-menu--collapse) {
+      width: 200px;
+      min-height: 400px;
+    }
     .el-aside {
       background-color: #fff;
       box-shadow: 0px 4px 5px 0px rgba(63, 63, 63, 0.35);

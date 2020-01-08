@@ -34,24 +34,24 @@ export default [
     redirect: '/index/subject',
     // 嵌套路由
     children: [{
-      // 学科列表
-      path: '/index/subject',
-      component: subject,
+      // 数据概述
+      path: '/index/chart',
+      component: chart,
       meta: {
-        title: '学科列表',
-        icon: 'el-icon-office-building',
-        fullPath: '/index/subject',
+        title: '数据概述',
+        icon: 'el-icon-pie-chart',
+        fullPath: '/index/chart',
         roles: ['超级管理员', '管理员', '老师']
       }
     }, {
-      // 企业列表
-      path: '/index/enterprise',
-      component: enterprise,
+      // 用户列表
+      path: '/index/user',
+      component: user,
       meta: {
-        title: '企业列表',
-        icon: 'el-icon-notebook-2',
-        fullPath: '/index/enterprise',
-        roles: ['超级管理员', '管理员', '老师']
+        title: '用户列表',
+        icon: 'el-icon-user',
+        fullPath: '/index/user',
+        roles: ['超级管理员', '管理员']
       }
     }, {
       // 题库列表
@@ -64,23 +64,23 @@ export default [
         roles: ['超级管理员', '管理员', '老师', '学生']
       }
     }, {
-      // 用户列表
-      path: '/index/user',
-      component: user,
+      // 企业列表
+      path: '/index/enterprise',
+      component: enterprise,
       meta: {
-        title: '用户列表',
-        icon: 'el-icon-use',
-        fullPath: '/index/user',
-        roles: ['超级管理员', '管理员']
+        title: '企业列表',
+        icon: 'el-icon-notebook-2',
+        fullPath: '/index/enterprise',
+        roles: ['超级管理员', '管理员', '老师']
       }
     }, {
-      // 数据概述
-      path: '/index/chart',
-      component: chart,
+      // 学科列表
+      path: '/index/subject',
+      component: subject,
       meta: {
-        title: '数据概述',
-        icon: 'el-icon-pie-chart',
-        fullPath: '/index/chart',
+        title: '学科列表',
+        icon: 'el-icon-office-building',
+        fullPath: '/index/subject',
         roles: ['超级管理员', '管理员', '老师']
       }
     }]
