@@ -25,6 +25,6 @@ export function checkedAgree(rule, val, callback) {
   if (val) {
     return callback()
   } else {
-    return callback(new Error('请先同意'))
+    return callback(new Error('请先勾选同意'))
   }
 }

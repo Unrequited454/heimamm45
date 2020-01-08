@@ -108,7 +108,7 @@
             </el-form-item>
           </el-col>
           <el-col :span="7">
-            <el-button @click="getCaptcha" :disabled="delayTime !== 0">获取用户验证码</el-button>
+            <el-button @click="getCaptcha">{{delayTime ===0?'获取用户验证码': `${delayTime}S`}}</el-button>
           </el-col>
         </el-row>
       </el-form>
@@ -122,7 +122,7 @@
 
 <script>
 import { setToken } from '@/utils/token.js'
-import { login, sendsms, register } from '@/api/login.js'
+import { login, sendsms, register, userinfo } from '@/api/login.js'
 import { phoneCheck, emailCheck, checkedAgree } from '@/utils/validator'
 export default {
   data() {
@@ -139,9 +139,9 @@ export default {
         // 号码输入框
         phone: [{ required: true, message: '手机号码不能为空', trigger: 'blur' }, { validator: phoneCheck }],
         // 密码
-        password: [{ required: true, message: '密码不能为空', trigger: 'blur' }, { min: 6, max: 12, message: '密码长度为6~12个字符' }],
+        password: [{ required: true, message: '密码不能为空', trigger: 'blur' }, { min: 6, max: 12, message: '密码长度为6~12个字符', trigger: 'change' }],
         // 验证码
-        code: [{ required: true, message: '验证码不能为空', trigger: 'blur' }, { min: 4, max: 4, message: '验证码长度为4' }],
+        code: [{ required: true, message: '验证码不能为空', trigger: 'blur' }, { min: 4, max: 4, message: '验证码长度为4', trigger: 'change' }],
         // 勾选
         checked: [{ validator: checkedAgree }]
       },
@@ -170,7 +170,7 @@ export default {
       // 注册表单验证
       registerRul: {
         // 头像验证
-        avatar: [{ required: true }],
+        avatar: [{ required: true, message: '请上传图像', trigger: 'change' }],
         // 昵称验证
         username: [{ required: true, message: '用户名不能为空', trigger: 'blur' }],
         // 邮箱验证
@@ -197,16 +197,21 @@ export default {
     loginBtn() {
       this.$refs.loginRef.validate(valid => {
         if (!valid) {
-          return this.$message.error('请正确填写登录信息')
+          return this.$message.error('请输入正确登录信息')
         } else {
           login(this.loginForm).then(res => {
             if (res.code === 200) {
-              this.$message.success('登录成功')
+              console.log('用户登录', res)
+              userinfo().then(res => {
+                if (res.data.status === 1) {
+                  this.$message.success('登录成功')
+                }
+              })
               setToken(res.data.token)
               this.$router.push('/index')
               console.log(res)
             } else if (res.code === 202) {
-              this.$message.error(res.message)
+              this.$message.error('用户名或密码错误')
               console.log(res)
             }
           })
@@ -231,7 +236,6 @@ export default {
       if (res.code === 200) {
         this.$message.success('头像上传成功')
         this.registerForm.avatar = res.data.file_path
-        console.log('头像上传参数路径', this.registerForm.avatar)
       } else {
         return this.$message.error('头像上传失败，请重新上传')
       }
@@ -256,18 +260,26 @@ export default {
     },
     // 获取验证码
     getCaptcha() {
-      if (this.delayTime === 0) {
-        this.delayTime = 60
-        let timeId = setInterval(() => {
-          this.delayTime--
-          if (this.delayTime === 0) {
-            clearInterval(timeId)
-          }
-        }, 100)
+      // 先判断图形验证码是否有输入以及手机号码格式
+      if (this.registerForm.code.length !== 4) {
+        return this.$message.warning('验证码有误')
+      }
+      // 验证手机的正则表达式
+      const regMobile = /^(0|86|17951)?(13[0-9]|15[012356789]|17[678]|18[0-9]|14[57])[0-9]{8}$/
+      if (!regMobile.test(this.registerForm.phone)) {
+        return this.$message.warning('手机号码格式有误')
       }
       sendsms({ code: this.registerForm.code, phone: this.registerForm.phone }).then(res => {
-        console.log(res)
         if (res.code === 200) {
+          if (this.delayTime === 0) {
+            this.delayTime = 15
+            let timeId = setInterval(() => {
+              this.delayTime--
+              if (this.delayTime === 0) {
+                clearInterval(timeId)
+              }
+            }, 1000)
+          }
           this.registerForm.rcode = res.data.captcha
         } else {
           return this.$message.error(res.message)
@@ -278,7 +290,7 @@ export default {
     ensureRegister() {
       this.$refs.registerRef.validate(valid => {
         if (!valid) {
-          return this.$message.error('请填写正确信息')
+          return this.$message.error('请完善注册信息')
         }
         console.log('注册参数：', this.registerForm)
         register(this.registerForm).then(res => {
@@ -288,6 +300,8 @@ export default {
             this.$refs.registerRef.resetFields()
             this.picUrl = ''
             this.$message.success('注册成功')
+          } else if (res.code === 201) {
+            return this.$message.warning(res.message)
           } else {
             return this.$message.error('注册失败')
           }
@@ -372,6 +386,9 @@ export default {
       width: 100%;
       margin-top: 28px;
     }
+    .el-link {
+      vertical-align: top;
+    }
     .btn-register {
       width: 100%;
       margin: 26px 0 0;
@@ -382,17 +399,6 @@ export default {
 .register-dialog {
   .el-dialog {
     width: 600px;
-    // 顶部颜色
-    .el-dialog__header {
-      color: #fff;
-      background: linear-gradient(225deg, rgba(1, 198, 250, 1), rgba(20, 147, 250, 1));
-    }
-    .el-dialog__title {
-      color: #fff;
-    }
-    .el-dialog__close {
-      color: #fff;
-    }
   }
   // 头像样式
   .avatar-uploader {

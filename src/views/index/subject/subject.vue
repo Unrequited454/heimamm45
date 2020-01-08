@@ -100,7 +100,7 @@
       </span>
     </el-dialog>
     <!-- 修改学科对话框 -->
-<!--     <el-dialog center title="新增学科" :visible.sync="editDlVisible" :before-close="cancelAddSubject">
+    <!--     <el-dialog center title="新增学科" :visible.sync="editDlVisible" :before-close="cancelAddSubject">
       <el-form
         ref="editSubjectRef"
         :rules="editSubjectRul"
@@ -127,7 +127,7 @@
         <el-button @click="cancelAddSubject">取 消</el-button>
         <el-button type="primary" @click="ensureAddSubject">确 定</el-button>
       </span>
-    </el-dialog> -->
+    </el-dialog>-->
   </div>
 </template>
 
@@ -283,28 +283,9 @@ export default {
   .card-main {
     margin-top: 19px;
   }
-  .pagination {
-    width: 543px;
-    height: 30px;
-    margin: 30px auto 10px;
-  }
   .el-dialog {
     width: 600px;
     height: 508px;
-    // 顶部颜色
-    .el-dialog__header {
-      color: #fff;
-      background: linear-gradient(225deg, rgba(1, 198, 250, 1), rgba(20, 147, 250, 1));
-    }
-    .el-dialog__title {
-      color: #fff;
-    }
-    .el-dialog__close {
-      color: #fff;
-    }
-  }
-  .forbidden {
-    color: red;
   }
 }
 </style>
