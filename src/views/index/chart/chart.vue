@@ -122,10 +122,10 @@ export default {
   created() {
     // 调用数据面板获取面板数据函数
     this.getDataTitle()
-  },
-  mounted() {
-    // 调用企业题目统计数据
-    this.getDataEnterprise()
+    this.$nextTick(() => {
+      // 调用企业题目统计数据
+      this.getDataEnterprise()
+    })
   }
 }
 </script>
