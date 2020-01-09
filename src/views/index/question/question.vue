@@ -17,9 +17,9 @@
             </el-form-item>
             <el-form-item label="阶段" prop="step">
               <el-select v-model="questionForm.step" placeholder="请选择阶段">
-                <el-option label="初级" value="1"></el-option>
-                <el-option label="中级" value="2"></el-option>
-                <el-option label="高级" value="3"></el-option>
+                <el-option label="初级" :value="1"></el-option>
+                <el-option label="中级" :value="2"></el-option>
+                <el-option label="高级" :value="3"></el-option>
               </el-select>
             </el-form-item>
             <el-form-item label="企业" prop="enterprise">
@@ -34,9 +34,9 @@
             </el-form-item>
             <el-form-item label="题型" prop="type">
               <el-select v-model="questionForm.type" placeholder="请选择题型">
-                <el-option label="单选" value="1"></el-option>
-                <el-option label="多选" value="2"></el-option>
-                <el-option label="简单" value="3"></el-option>
+                <el-option label="单选" :value="1"></el-option>
+                <el-option label="多选" :value="2"></el-option>
+                <el-option label="简单" :value="3"></el-option>
               </el-select>
             </el-form-item>
           </el-col>
@@ -119,6 +119,7 @@
       </el-table>
       <div class="pagination">
         <el-pagination
+          background
           @size-change="handleSizeChange"
           @current-change="handleCurrentChange"
           :current-page="questionForm.page"
@@ -136,13 +137,14 @@
 
 <script>
 // 导入新增试题组件
-import addDialog from './components/addDialog.vue'
+import addQuestion from './components/addQuestion.vue'
 import { questionList, questionRemove, questionStatus } from '@/api/question.js'
 // 导入subject
 import { subjectList } from '@/api/subject.js'
 // 导入enterprise
 import { enterpriseList } from '@/api/enterprise.js'
 export default {
+  name: 'add-question',
   data() {
     return {
       // 题库表单
@@ -222,6 +224,10 @@ export default {
       if (confirmRes === 'confirm') {
         questionRemove(row.id).then(res => {
           if (res.code === 200) {
+            if (this.questionData.length === 1) {
+              this.questionForm.page--
+              this.questionForm.page = this.questionForm.page === 0 ? 1 : this.questionForm.page
+            }
             this.$message.success('删除成功')
             this.getQuestionList()
           } else {
@@ -263,7 +269,7 @@ export default {
     this.getQuestionList()
   },
   components: {
-    'add-question': addDialog
+    'add-question': addQuestion
   }
 }
 </script>
@@ -285,17 +291,6 @@ export default {
     .el-form-item__label {
       padding-right: 30px;
     }
-  }
-  .card-main {
-    margin-top: 19px;
-  }
-  .pagination {
-    width: 543px;
-    height: 30px;
-    margin: 30px auto 10px;
-  }
-  .forbidden {
-    color: red;
   }
 }
 </style>

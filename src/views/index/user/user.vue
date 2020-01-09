@@ -63,6 +63,7 @@
       <!-- 分页区域 -->
       <div class="pagination">
         <el-pagination
+          background
           @size-change="handleSizeChange"
           @current-change="handleCurrentChange"
           :current-page="userForm.page"

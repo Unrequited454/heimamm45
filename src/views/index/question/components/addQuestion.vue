@@ -22,9 +22,9 @@
         </el-form-item>
         <el-form-item label="阶段" prop="step">
           <el-select v-model="addQuestionForm.step" placeholder="请选择阶段">
-            <el-option label="初级" value="1"></el-option>
-            <el-option label="中级" value="2"></el-option>
-            <el-option label="高级" value="3"></el-option>
+            <el-option label="初级" :value="1"></el-option>
+            <el-option label="中级" :value="2"></el-option>
+            <el-option label="高级" :value="3"></el-option>
           </el-select>
         </el-form-item>
         <el-form-item label="企业" prop="enterprise">
@@ -131,7 +131,7 @@
           label="多选"
           prop="multiple_select_answer"
         >
-          <el-radio-group v-model="addQuestionForm.multiple_select_answer">
+          <el-checkbox-group v-model="addQuestionForm.multiple_select_answer">
             <div class="raido-box">
               <el-checkbox label="A">A</el-checkbox>
               <el-input v-model="addQuestionForm.select_options[0].text"></el-input>
@@ -146,7 +146,7 @@
                 <i v-else class="el-icon-plus avatar-uploader-icon"></i>
               </el-upload>
             </div>
-            <div class="raido-box">
+            <div class="raido-box checkbox-radio">
               <el-checkbox label="B">B</el-checkbox>
               <el-input v-model="addQuestionForm.select_options[1].text"></el-input>
               <el-upload
@@ -160,7 +160,7 @@
                 <i v-else class="el-icon-plus avatar-uploader-icon"></i>
               </el-upload>
             </div>
-            <div class="raido-box">
+            <div class="raido-box checkbox-radio">
               <el-checkbox label="C">C</el-checkbox>
               <el-input v-model="addQuestionForm.select_options[2].text"></el-input>
               <el-upload
@@ -174,7 +174,7 @@
                 <i v-else class="el-icon-plus avatar-uploader-icon"></i>
               </el-upload>
             </div>
-            <div class="raido-box">
+            <div class="raido-box checkbox-radio">
               <el-checkbox label="D">D</el-checkbox>
               <el-input v-model="addQuestionForm.select_options[3].text"></el-input>
               <el-upload
@@ -188,7 +188,7 @@
                 <i v-else class="el-icon-plus avatar-uploader-icon"></i>
               </el-upload>
             </div>
-          </el-radio-group>
+          </el-checkbox-group>
         </el-form-item>
         <!-- 简单区域 -->
         <el-form-item v-else label="简答" prop="short_answer">
@@ -249,22 +249,22 @@ export default {
         select_options: [
           {
             label: 'A',
-            text: '狗不理',
+            text: '单选A',
             image: ''
           },
           {
             label: 'B',
-            text: '西兰花',
+            text: '单选B',
             image: ''
           },
           {
             label: 'C',
-            text: '',
+            text: '单选C',
             image: ''
           },
           {
             label: 'D',
-            text: '',
+            text: '单选D',
             image: ''
           }
         ],
@@ -418,17 +418,6 @@ export default {
 <style lang="less">
 .add-question {
   width: 100%;
-  // 对话框头部样式
-  .el-dialog__header {
-    color: #fff;
-    background: linear-gradient(225deg, rgba(1, 198, 250, 1), rgba(20, 147, 250, 1));
-    .el-dialog__close {
-      color: #fff;
-    }
-  }
-  .el-dialog__title {
-    color: #fff;
-  }
   // 表单居中
   .el-dialog__body {
     display: flex;
@@ -452,12 +441,16 @@ export default {
   .raido-box {
     display: flex;
     align-items: center;
+    line-height: 0;
     .el-input {
       width: 476px;
     }
     .el-checkbox {
       margin-right: 29px;
     }
+  }
+  .checkbox-radio {
+    margin-left: 80px;
   }
   // 分割线样式
   .el-divider--horizontal {
