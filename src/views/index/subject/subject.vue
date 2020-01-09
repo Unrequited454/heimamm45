@@ -163,7 +163,7 @@ export default {
           if (res.code !== 200) {
             return this.$message.warning('删除失败')
           }
-          // 判断当前页数据是否为1，是-->跳转上一页，否不用跳，当前页是第一页时，不同跳转上一页
+          // TODO: 判断当前页数据是否为1，是-->跳转上一页，否不用跳，当前页是第一页时，不同跳转上一页
           if (this.subjectList.length === 1) {
             this.subjectForm.page--
             this.subjectForm.page = this.subjectForm.page === 0 ? 1 : this.subjectForm.page

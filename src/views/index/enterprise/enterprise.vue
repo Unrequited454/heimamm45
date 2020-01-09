@@ -31,7 +31,7 @@
         <el-table-column type="index" label="序号"></el-table-column>
         <el-table-column prop="eid" label="企业编号" width="180"></el-table-column>
         <el-table-column prop="name" label="企业名称" width="180"></el-table-column>
-        <el-table-column prop="creater" label="创建者"></el-table-column>
+        <el-table-column prop="username" label="创建者"></el-table-column>
         <el-table-column prop="create_time" label="创建日期"></el-table-column>
         <el-table-column label="状态">
           <template slot-scope="scope">
@@ -45,7 +45,7 @@
             <el-button
               type="text"
               @click="changeStatus(scope.row)"
-            >{{scope.row.status===1?'启用':'禁用'}}</el-button>
+            >{{scope.row.status===0?'启用':'禁用'}}</el-button>
             <el-button type="text" @click="removeEnterprise(scope.row)">删除</el-button>
           </template>
         </el-table-column>
@@ -64,40 +64,24 @@
       </div>
     </el-card>
     <!-- 新增企业对话框 -->
-    <el-dialog center title="新增企业" :visible.sync="addDlVisible" :before-close="cancalAdd">
-      <el-form
-        ref="addEnterpriseRef"
-        :rules="addEnterpriseRul"
-        :model="addEnterpriseForm"
-        label-width="80px"
-      >
-        <el-form-item label="企业编号" prop="eid">
-          <el-input v-model="addEnterpriseForm.eid"></el-input>
-        </el-form-item>
-        <el-form-item label="企业名称" prop="name">
-          <el-input v-model="addEnterpriseForm.name"></el-input>
-        </el-form-item>
-        <el-form-item label="企业简称" prop="short_name">
-          <el-input v-model="addEnterpriseForm.short_name"></el-input>
-        </el-form-item>
-        <el-form-item label="企业简介" prop="intro">
-          <el-input type="textarea" v-model="addEnterpriseForm.intro"></el-input>
-        </el-form-item>
-        <el-form-item label="企业备注" prop="remark">
-          <el-input v-model="addEnterpriseForm.remark"></el-input>
-        </el-form-item>
-      </el-form>
-      <span slot="footer" class="dialog-footer">
-        <el-button @click="cancalAdd">取 消</el-button>
-        <el-button type="primary" @click="ensureAdd">确 定</el-button>
-      </span>
-    </el-dialog>
+    <add-enterprise></add-enterprise>
+    <!-- 编辑企业对话框 -->
+    <edit-enterprise ref="editEnterpriseRef"></edit-enterprise>
   </div>
 </template>
 
 <script>
-import { enterpriseList, enterpriseAdd, enterpriseStatus, enterpriseRemove } from '@/api/enterprise'
+import addEnterprise from './components/addEnterprise.vue'
+import editEnterprise from './components/editEnterprise.vue'
+import { enterpriseList, enterpriseStatus, enterpriseRemove } from '@/api/enterprise'
 export default {
+  name: 'enterprise',
+  components: {
+    // 新增企业组件
+    'add-enterprise': addEnterprise,
+    // 编辑企业组件
+    'edit-enterprise': editEnterprise
+  },
   data() {
     return {
       // 企业表单
@@ -115,25 +99,8 @@ export default {
       total: 0,
       // 新增企业对话框显示状态
       addDlVisible: false,
-      // 新增企业请求参数对象
-      addEnterpriseForm: {
-        // 企业编号
-        eid: '',
-        // 企业名称
-        name: '',
-        // 企业简称
-        short_name: '',
-        // 企业简介
-        intro: '',
-        // 备注
-        remark: ''
-      },
-      // 新增企业表单验证
-      addEnterpriseRul: {
-        eid: [{ required: true, message: '请输入企业编号', trigger: 'blur' }],
-        name: [{ required: true, message: '请输入企业名称', trigger: 'blur' }],
-        short_name: [{ required: true, message: '请输入企业简介', trigger: 'blur' }]
-      }
+      // 编辑企业对话框显示状态
+      editDlVisible: false
     }
   },
   methods: {
@@ -149,6 +116,8 @@ export default {
     },
     // 搜索
     search() {
+      // 跳转到页码1
+      this.enterPriseForm.page = 1
       this.getEnterpriseList()
     },
     // 清除
@@ -160,31 +129,12 @@ export default {
     addEnterPrise() {
       this.addDlVisible = true
     },
-    // 取消新增企业
-    cancalAdd() {
-      this.addDlVisible = false
-    },
-    // 确定新增企业
-    ensureAdd() {
-      this.$refs.addEnterpriseRef.validate(valid => {
-        if (!valid) {
-          return this.$message.warning('请填写完整企业信息')
-        }
-        enterpriseAdd(this.addEnterpriseForm).then(res => {
-          console.log('添加企业：', res)
-          if (res.code === 200) {
-            this.addDlVisible = false
-            this.$message.success('企业新增成功')
-            this.getEnterpriseList()
-            this.$refs.addEnterpriseRef.resetFields()
-          } else {
-            return this.$message.warning('企业新增失败')
-          }
-        })
-      })
-    },
     // 编辑企业
-    editEnterprise(row) {},
+    editEnterprise(row) {
+      this.editDlVisible = true
+      // 深拷贝并赋值给组件的表单对象
+      this.$refs.editEnterpriseRef.editEnterpriseForm = JSON.parse(JSON.stringify(row))
+    },
     // 修改企业状态
     changeStatus(row) {
       enterpriseStatus(row.id).then(res => {
@@ -208,6 +158,11 @@ export default {
         enterpriseRemove(row.id).then(res => {
           console.log('删除企业：', res)
           if (res.code === 200) {
+            // TODO:判断当前页中数据，若数据为1，删完当前页无数据，跳转前一页，若数据大于1，删完后无须跳转前一页，当当前页处于第一页时，删完后无数据让页码强制为1
+            if (this.enterPriseList.length === 1) {
+              this.enterPriseForm.page--
+              this.enterPriseForm.page = this.enterPriseForm.page === 0 ? 1 : this.enterPriseForm.page
+            }
             this.$message.success('删除成功')
             this.getEnterpriseList()
           } else {
@@ -239,31 +194,5 @@ export default {
 .enterprise-container {
   width: 100%;
   height: 100%;
-  .card-main {
-    margin-top: 19px;
-  }
-  .pagination {
-    width: 543px;
-    height: 30px;
-    margin: 30px auto 10px;
-  }
-  .el-dialog {
-    width: 600px;
-    height: 508px;
-    // 顶部颜色
-    .el-dialog__header {
-      color: #fff;
-      background: linear-gradient(225deg, rgba(1, 198, 250, 1), rgba(20, 147, 250, 1));
-    }
-    .el-dialog__title {
-      color: #fff;
-    }
-    .el-dialog__close {
-      color: #fff;
-    }
-  }
-  .forbidden {
-    color: red;
-  }
 }
 </style>

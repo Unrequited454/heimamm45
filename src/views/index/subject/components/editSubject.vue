@@ -2,7 +2,7 @@
   <div class="edit-dialog">
     <el-dialog
       center
-      title="新增学科"
+      title="编辑学科"
       :visible.sync="$parent.editDlVisible"
       :before-close="cancelEditSubject"
     >
