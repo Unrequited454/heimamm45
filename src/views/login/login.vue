@@ -209,10 +209,9 @@ export default {
               })
               setToken(res.data.token)
               this.$router.push('/index')
-              console.log(res)
             } else if (res.code === 202) {
-              this.$message.error('用户名或密码错误')
-              console.log(res)
+              let tip = { 验证码错误: '验证码错误', 登录密码不匹配: '手机号码或密码错误' }
+              this.$message.error(tip[res.message])
             }
           })
         }

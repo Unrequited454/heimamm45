@@ -40,15 +40,27 @@
         </el-table-column>
         <el-table-column label="操作">
           <template slot-scope="scope">
-            <el-button type="text">编辑</el-button>
-            <el-button
-              type="text"
-              @click="changeStatus(scope.row)"
-            >{{scope.row.status===0?'启用':'禁用'}}</el-button>
-            <el-button type="text" @click="removeUser(scope.row)">删除</el-button>
+            <template v-if="scope.row.role_id ===1">
+              <el-button disabled type="text" @click="editUser(scope.row)">编辑</el-button>
+              <el-button
+                type="text"
+                disabled
+                @click="changeStatus(scope.row)"
+              >{{scope.row.status===0?'启用':'禁用'}}</el-button>
+              <el-button disabled type="text" @click="removeUser(scope.row)">删除</el-button>
+            </template>
+            <template v-else>
+              <el-button type="text" @click="editUser(scope.row)">编辑</el-button>
+              <el-button
+                type="text"
+                @click="changeStatus(scope.row)"
+              >{{scope.row.status===0?'启用':'禁用'}}</el-button>
+              <el-button type="text" @click="removeUser(scope.row)">删除</el-button>
+            </template>
           </template>
         </el-table-column>
       </el-table>
+      <!-- 分页区域 -->
       <div class="pagination">
         <el-pagination
           @size-change="handleSizeChange"
@@ -62,46 +74,22 @@
       </div>
     </el-card>
     <!-- 新增用户对话框区域 -->
-    <el-dialog center title="新增用户" :visible.sync="addDlVisible" :before-close="cancelAdd">
-      <el-form ref="addUserRef" :model="addUserForm" :rules="addUserRul" label-width="80px">
-        <el-form-item label="用户名" prop="username">
-          <el-input v-model="addUserForm.username"></el-input>
-        </el-form-item>
-        <el-form-item label="邮箱" prop="email">
-          <el-input v-model="addUserForm.email"></el-input>
-        </el-form-item>
-        <el-form-item label="电话" prop="phone">
-          <el-input v-model="addUserForm.phone"></el-input>
-        </el-form-item>
-        <el-form-item label="角色" prop="role_id">
-          <el-select v-model="addUserForm.role_id" placeholder="请选择角色">
-            <el-option label="管理员" value="2"></el-option>
-            <el-option label="老师" value="3"></el-option>
-            <el-option label="学生" value="4"></el-option>
-          </el-select>
-        </el-form-item>
-        <el-form-item label="状态" prop="status">
-          <el-select v-model="addUserForm.status" placeholder="请选择状态">
-            <el-option label="启用" value="1"></el-option>
-            <el-option label="禁用" value="0"></el-option>
-          </el-select>
-        </el-form-item>
-        <el-form-item label="用户备注" prop="remark">
-          <el-input type="textarea" v-model="addUserForm.remark"></el-input>
-        </el-form-item>
-      </el-form>
-      <span slot="footer" class="dialog-footer">
-        <el-button @click="cancelAdd">取 消</el-button>
-        <el-button type="primary" @click="ensureAdd">确 定</el-button>
-      </span>
-    </el-dialog>
+    <add-user></add-user>
+    <!-- 编辑用户对话框区域 -->
+    <edit-user ref="editUserRef"></edit-user>
   </div>
 </template>
 
 <script>
-import { userList, userStatus, userRemove, userAdd } from '@/api/user.js'
-import { phoneCheck, emailCheck } from '@/utils/validator.js'
+import addUser from './components/addUser.vue'
+import editUser from './components/editUser.vue'
+import { userList, userStatus, userRemove } from '@/api/user.js'
 export default {
+  name: 'user',
+  components: {
+    'add-user': addUser,
+    'edit-user': editUser
+  },
   data() {
     return {
       // 用户表单
@@ -123,22 +111,8 @@ export default {
       total: 0,
       // 添加用户对话框显示状态
       addDlVisible: false,
-      // 添加用户表单
-      addUserForm: {
-        username: '',
-        email: '',
-        phone: '',
-        role_id: '',
-        status: '',
-        remark: ''
-      },
-      // 新增用户表单规则验证
-      addUserRul: {
-        username: [{ required: true, message: '请输入用户名', trigger: 'blur' }],
-        email: [{ required: true, message: '请输入邮箱', trigger: 'blur' }, { validator: emailCheck, trigger: 'change' }],
-        phone: [{ required: true, message: '请输入手机号', trigger: 'blur' }, { validator: phoneCheck, trigger: 'change' }],
-        role_id: [{ required: true, message: '请选择角色', trigger: 'blur' }]
-      }
+      // 编辑用户对话框显示状态
+      editDlVisible: false
     }
   },
   methods: {
@@ -166,6 +140,11 @@ export default {
     addUser() {
       this.addDlVisible = true
     },
+    // 编辑用户按钮
+    editUser(row) {
+      this.editDlVisible = true
+      this.$refs.editUserRef.editUserForm = JSON.parse(JSON.stringify(row))
+    },
     // 改变用户状态
     changeStatus(row) {
       userStatus(row.id).then(res => {
@@ -187,6 +166,10 @@ export default {
       if (confirmRes === 'confirm') {
         userRemove(row.id).then(res => {
           if (res.code === 200) {
+            if (this.userList.length === 1) {
+              this.userForm.page--
+              this.userForm.page = this.userForm.page === 0 ? 1 : this.userForm.page
+            }
             this.$message.success('删除用户成功')
             this.getUserList()
           } else {
@@ -196,29 +179,6 @@ export default {
       } else {
         return this.$message.info('已取消删除用户')
       }
-    },
-    // 确定添加用户
-    ensureAdd() {
-      this.$refs.addUserRef.validate(valid => {
-        if (!valid) {
-          return this.$message.warning('请完善新增用户必填项')
-        }
-        userAdd(this.addUserForm).then(res => {
-          console.log('新增用户结果:', res)
-          if (res.code === 200) {
-            this.$message.success('新增用户成功')
-            this.getUserList()
-            this.addDlVisible = false
-            this.$refs.addUserRef.resetFields()
-          } else {
-            return this.$message.error(res.message)
-          }
-        })
-      })
-    },
-    // 取消添加用户
-    cancelAdd() {
-      this.addDlVisible = false
     },
     // 分页-页尺寸改变触发
     handleSizeChange(newSize) {
@@ -242,31 +202,5 @@ export default {
 .user-container {
   width: 100%;
   height: 100%;
-  .card-main {
-    margin-top: 19px;
-    .forbidden {
-      color: red;
-    }
-  }
-  .el-dialog {
-    width: 478px;
-    height: 558px;
-    // 顶部颜色
-    .el-dialog__header {
-      color: #fff;
-      background: linear-gradient(225deg, rgba(1, 198, 250, 1), rgba(20, 147, 250, 1));
-    }
-    .el-dialog__title {
-      color: #fff;
-    }
-    .el-dialog__close {
-      color: #fff;
-    }
-  }
-  .pagination {
-    width: 543px;
-    height: 30px;
-    margin: 30px auto 10px;
-  }
 }
 </style>
