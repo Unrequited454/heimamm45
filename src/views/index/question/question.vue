@@ -72,7 +72,7 @@
             <el-form-item>
               <el-button type="primary" @click="search">搜索</el-button>
               <el-button @click="reset">清除</el-button>
-              <el-button type="primary" icon="el-icon-plus" @click="addQuestion">新增试题</el-button>
+              <el-button type="primary" icon="el-icon-plus" @click="addQuestionBtn">新增试题</el-button>
             </el-form-item>
           </el-col>
         </el-row>
@@ -145,6 +145,9 @@ import { subjectList } from '@/api/subject.js'
 import { enterpriseList } from '@/api/enterprise.js'
 export default {
   name: 'add-question',
+  components: {
+    'add-question': addQuestion
+  },
   data() {
     return {
       // 题库表单
@@ -163,7 +166,9 @@ export default {
       // 题库列表总条数
       total: 0,
       // 新增题目对话框显示状态
-      addDlvisible: false
+      addDlvisible: false,
+      // 编辑题库对话框显示状态
+      editDlvisible: false
     }
   },
   methods: {
@@ -211,7 +216,7 @@ export default {
       this.getQuestionList()
     },
     // 新增题库按钮
-    addQuestion() {
+    addQuestionBtn() {
       this.addDlvisible = true
     },
     // 删除题型按钮
@@ -267,9 +272,6 @@ export default {
     this.getEnterpriseList()
     // 调用题库请求数据函数
     this.getQuestionList()
-  },
-  components: {
-    'add-question': addQuestion
   }
 }
 </script>
