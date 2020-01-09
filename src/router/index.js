@@ -71,6 +71,8 @@ router.beforeEach((to, from, next) => {
             // 将用户的信息保存到store中
             store.commit('setInfo', res.data)
             // 判断用户信息token验证成功
+            console.log('Vuex中的数据', store.state.userInfo)
+            console.log('角色', to.meta.roles)
             next()
           }
         }
@@ -78,6 +80,7 @@ router.beforeEach((to, from, next) => {
     } else {
       // 有用户信息，执行
       // 判断是否有权限访问
+      // 判断元子段中是否有包含有这些角色
       if (to.meta.roles.includes(store.state.userInfo.role)) {
         next()
       } else {

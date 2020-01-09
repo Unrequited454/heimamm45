@@ -14,8 +14,8 @@
         </el-form-item>
         <el-form-item label="状态" prop="status">
           <el-select v-model="subjectForm.status" placeholder="请选择状态">
-            <el-option label="启用" :value="1"></el-option>
-            <el-option label="禁用" :value="0"></el-option>
+            <el-option label="启用" value="1"></el-option>
+            <el-option label="禁用" value="0"></el-option>
           </el-select>
         </el-form-item>
         <el-form-item>
@@ -32,7 +32,7 @@
         <el-table-column prop="rid" label="学科编号" width="180"></el-table-column>
         <el-table-column prop="name" label="学科名称" width="180"></el-table-column>
         <el-table-column prop="intro" label="简称"></el-table-column>
-        <el-table-column prop="creater" label="创建者"></el-table-column>
+        <el-table-column prop="username" label="创建者"></el-table-column>
         <el-table-column prop="create_time" label="创建日期"></el-table-column>
         <el-table-column label="状态">
           <template slot-scope="scope">
@@ -42,11 +42,11 @@
         </el-table-column>
         <el-table-column label="操作">
           <template slot-scope="scope">
-            <el-button type="text">编辑</el-button>
+            <el-button type="text" @click="editSubject(scope.row)">编辑</el-button>
             <el-button
               type="text"
               @click="changeStatus(scope.row)"
-            >{{scope.row.status==1?'启用': '禁用'}}</el-button>
+            >{{scope.row.status==0?'启用': '禁用'}}</el-button>
             <el-button type="text" @click="removeSubject(scope.row)">删除</el-button>
           </template>
         </el-table-column>
@@ -66,74 +66,21 @@
       </div>
     </el-card>
     <!-- 添加学科对话框 -->
-    <el-dialog
-      center
-      title="新增学科"
-      :visible.sync="subjectDlVisible"
-      :before-close="cancelAddSubject"
-    >
-      <el-form
-        ref="addSubjectRef"
-        :rules="addSubjectRul"
-        :model="addSubjectForm"
-        label-width="80px"
-      >
-        <el-form-item label="学科编号" prop="rid">
-          <el-input v-model="addSubjectForm.rid"></el-input>
-        </el-form-item>
-        <el-form-item label="学科名称" prop="name">
-          <el-input v-model="addSubjectForm.name"></el-input>
-        </el-form-item>
-        <el-form-item label="学科简称">
-          <el-input v-model="addSubjectForm.short_name"></el-input>
-        </el-form-item>
-        <el-form-item label="学科简介">
-          <el-input v-model="addSubjectForm.intro"></el-input>
-        </el-form-item>
-        <el-form-item label="学科备注">
-          <el-input v-model="addSubjectForm.remark"></el-input>
-        </el-form-item>
-      </el-form>
-      <span slot="footer" class="dialog-footer">
-        <el-button @click="cancelAddSubject">取 消</el-button>
-        <el-button type="primary" @click="ensureAddSubject">确 定</el-button>
-      </span>
-    </el-dialog>
+    <add-subject></add-subject>
     <!-- 修改学科对话框 -->
-    <!--     <el-dialog center title="新增学科" :visible.sync="editDlVisible" :before-close="cancelAddSubject">
-      <el-form
-        ref="editSubjectRef"
-        :rules="editSubjectRul"
-        :model="editSubjectForm"
-        label-width="80px"
-      >
-        <el-form-item label="学科编号" prop="rid">
-          <el-input v-model="addSubjectForm.rid"></el-input>
-        </el-form-item>
-        <el-form-item label="学科名称" prop="name">
-          <el-input v-model="addSubjectForm.name"></el-input>
-        </el-form-item>
-        <el-form-item label="学科简称">
-          <el-input v-model="addSubjectForm.short_name"></el-input>
-        </el-form-item>
-        <el-form-item label="学科简介">
-          <el-input v-model="addSubjectForm.intro"></el-input>
-        </el-form-item>
-        <el-form-item label="学科备注">
-          <el-input v-model="addSubjectForm.remark"></el-input>
-        </el-form-item>
-      </el-form>
-      <span slot="footer" class="dialog-footer">
-        <el-button @click="cancelAddSubject">取 消</el-button>
-        <el-button type="primary" @click="ensureAddSubject">确 定</el-button>
-      </span>
-    </el-dialog>-->
+    <edit-subject ref="editSubjectRef"></edit-subject>
   </div>
 </template>
 
 <script>
-import { subjectList, subjectAdd, subjectStatus, subjectRemove } from '@/api/subject.js'
+import { subjectList, subjectStatus, subjectRemove } from '@/api/subject.js'
+import addSubject from './components/addSubject.vue'
+import editSubject from './components/editSubject.vue'
 export default {
+  components: {
+    'add-subject': addSubject,
+    'edit-subject': editSubject
+  },
   data() {
     return {
       // 学科对象
@@ -156,24 +103,8 @@ export default {
       total: 0,
       // 新增学科对话框显示状态
       subjectDlVisible: false,
-      // 新增学科对象请求参数
-      addSubjectForm: {
-        // 学科编号--必传
-        rid: '',
-        // 学科名称--必传
-        name: '',
-        // 学科简称
-        short_name: '',
-        // 学科简介
-        intro: '',
-        // 备注
-        remark: ''
-      },
-      // 新增学科表单验证
-      addSubjectRul: {
-        rid: [{ required: true, message: '请输入学科编号', trigger: 'blur' }],
-        name: [{ required: true, message: '请输入学科名称', trigger: 'blur' }]
-      }
+      // 编辑学科对话框显示状态
+      editDlVisible: false
     }
   },
   methods: {
@@ -191,6 +122,7 @@ export default {
     // 搜索学科
     search() {
       console.log('搜索表单：', this.subjectForm)
+      this.subjectForm.page = 1
       this.getSubjectList()
     },
     // 清除按钮
@@ -204,35 +136,14 @@ export default {
     addSubject() {
       this.subjectDlVisible = true
     },
-    // 取消新增学科取消按钮
-    cancelAddSubject() {
-      this.subjectDlVisible = false
-      this.$refs.addSubjectRef.resetFields()
-    },
-    // 确认新增学科
-    ensureAddSubject() {
-      this.$refs.addSubjectRef.validate(valid => {
-        if (!valid) {
-          return this.$message.warning('请填写正确学科信息')
-        }
-        subjectAdd(this.addSubjectForm).then(res => {
-          console.log('新增学科：', res)
-          if (res.code === 200) {
-            this.$message.success('新增学科成功')
-            this.getSubjectList()
-            this.subjectDlVisible = false
-            this.$refs.addSubjectRef.resetFields()
-          } else {
-            this.$message.warning('新增学科失败')
-          }
-        })
-      })
+    // 编辑学科
+    editSubject(row) {
+      this.editDlVisible = true
+      this.$refs.editSubjectRef.editSubjectForm = JSON.parse(JSON.stringify(row))
     },
     // 改变状态
     changeStatus(row) {
-      console.log('获取行数据id', row.id)
       subjectStatus(row.id).then(res => {
-        console.log('状态改变：', res)
         if (res.code !== 200) {
           return this.$message.warning('状态改变失败')
         }
@@ -249,9 +160,13 @@ export default {
       }).catch(err => err)
       if (confirmRes === 'confirm') {
         subjectRemove(row.id).then(res => {
-          console.log('删除学科：', res)
           if (res.code !== 200) {
             return this.$message.warning('删除失败')
+          }
+          // 判断当前页数据是否为1，是-->跳转上一页，否不用跳，当前页是第一页时，不同跳转上一页
+          if (this.subjectList.length === 1) {
+            this.subjectForm.page--
+            this.subjectForm.page = this.subjectForm.page === 0 ? 1 : this.subjectForm.page
           }
           this.$message.success('删除成功')
           this.getSubjectList()
@@ -263,10 +178,12 @@ export default {
     // 页码尺寸改变触发
     handleSizeChange(newSize) {
       this.subjectForm.limit = newSize
+      this.getSubjectList()
     },
     // 页码改变触发
     handleCurrentChange(newPage) {
       this.subjectForm.page = newPage
+      this.getSubjectList()
     }
   },
   created() {
@@ -280,12 +197,6 @@ export default {
 .subject-container {
   width: 100%;
   height: 100%;
-  .card-main {
-    margin-top: 19px;
-  }
-  .el-dialog {
-    width: 600px;
-    height: 508px;
-  }
+  // overflow: hidden;
 }
 </style>

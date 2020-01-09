@@ -70,6 +70,9 @@ button {
 .clearfix {
   zoom: 1;
 }
+.card-main {
+  margin-top: 20px;
+}
 .pagination {
   width: 543px;
   height: 30px;
