@@ -1,0 +1,11 @@
+diff a/src/assets/style/base.css b/src/assets/style/base.css	(rejected hunks)
+@@ -70,6 +70,9 @@
+ .clearfix {
+   zoom: 1;
+ }
++.card-main {
++  margin-top: 20px;
++}
+ .pagination {
+   width: 543px;
+   height: 30px;
