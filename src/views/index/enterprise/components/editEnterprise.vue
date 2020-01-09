@@ -50,6 +50,7 @@ export default {
     // 取消编辑企业
     cancalEdit() {
       this.$parent.editDlVisible = false
+      this.$refs.editEnterpriseRef.resetFields()
     },
     // 确定编辑企业
     submitEdit() {
