@@ -7,6 +7,7 @@
       top="0"
       center
       :before-close="cancalEdit"
+      @opened="opened"
     >
       <!-- 表单区域 -->
       <el-form ref="editQuestionRef" :model="editQuestionForm" :rules="editQuestionRul">
@@ -42,14 +43,13 @@
             v-model="editQuestionForm.city"
             :options="cityOptions"
             :props="{ expandTrigger: 'hover' }"
-            @change="handleChange"
           ></el-cascader>
         </el-form-item>
         <el-form-item label="题型" prop="type">
           <el-radio-group v-model="editQuestionForm.type">
-            <el-radio label="1">单选</el-radio>
-            <el-radio label="2">多选</el-radio>
-            <el-radio label="3">简答</el-radio>
+            <el-radio :label="1">单选</el-radio>
+            <el-radio :label="2">多选</el-radio>
+            <el-radio :label="3">简答</el-radio>
           </el-radio-group>
         </el-form-item>
         <el-form-item label="难度" prop="difficulty">
@@ -64,7 +64,7 @@
         <el-form-item label="试题标题" prop="title"></el-form-item>
         <quill-editor v-model="editQuestionForm.title"></quill-editor>
         <!-- 单选区域 -->
-        <el-form-item v-if="editQuestionForm.type === '1'" label="单选" prop="single_select_answer">
+        <el-form-item v-if="editQuestionForm.type === 1" label="单选" prop="single_select_answer">
           <el-radio-group v-model="editQuestionForm.single_select_answer">
             C
             <div class="raido-box">
@@ -127,7 +127,7 @@
         </el-form-item>
         <!-- 多选区域 -->
         <el-form-item
-          v-else-if="editQuestionForm.type === '2'"
+          v-else-if="editQuestionForm.type === 2"
           label="多选"
           prop="multiple_select_answer"
         >
@@ -210,8 +210,8 @@
         </el-form-item>
         <el-divider></el-divider>
         <!-- 答案解析区域 -->
-        <el-form-item label="答案解析" prop="asnwer_analyze"></el-form-item>
-        <quill-editor v-model="editQuestionForm.asnwer_analyze"></quill-editor>
+        <el-form-item label="答案解析" prop="answer_analyze"></el-form-item>
+        <quill-editor v-model="editQuestionForm.answer_analyze"></quill-editor>
         <el-divider class="divider"></el-divider>
         <!-- 试题备注区域 -->
         <el-form-item label="试题备注" prop="remark">
@@ -220,7 +220,7 @@
       </el-form>
       <span slot="footer" class="dialog-footer">
         <el-button @click="cancalEdit">取 消</el-button>
-        <el-button type="primary" @click="ensureAdd">确 定</el-button>
+        <el-button type="primary" @click="submitAdd">确 定</el-button>
       </span>
     </el-dialog>
   </div>
@@ -229,9 +229,9 @@
 <script>
 // 导入element-china-area-data
 import { regionDataPlus } from 'element-china-area-data'
-import { questionAdd } from '@/api/question.js'
+import { questionEdit } from '@/api/question.js'
 export default {
-  name: 'add-question',
+  name: 'edit-question',
   data() {
     return {
       // 新增试题表单对象
@@ -296,7 +296,7 @@ export default {
         // 简单
         short_answer: [{ required: true, message: '请输入简答内容', trigger: 'blur' }],
         // 答案解析
-        asnwer_analyze: [{ required: true, message: '请填写答案解析', trigger: 'blur' }],
+        answer_analyze: [{ required: true, message: '请填写答案解析', trigger: 'blur' }],
         // 试题备注
         remark: [{ required: true, message: '请输入试题备注', trigger: 'blur' }]
       },
@@ -316,8 +316,22 @@ export default {
     }
   },
   methods: {
-    // 城市级联选择器选线改变时触发
-    handleChange() {},
+    // 打开对话框动画结束的回调
+    opened() {
+      // 处理图片路径
+      var imageUrl = this.editQuestionForm.select_options.map(item => {
+        return item.image.trim() === '' ? '' : process.env.VUE_APP_BASEURL + '/' + item.image
+      })
+      console.log('处理过后的图片路径地址:', imageUrl)
+      this.imageAUrl = imageUrl[0]
+      this.imageBUrl = imageUrl[1]
+      this.imageCUrl = imageUrl[2]
+      this.imageDUrl = imageUrl[3]
+      if (this.editQuestionForm.video) {
+        this.videoUrl = process.env.VUE_APP_BASEURL + '/' + this.editQuestionForm.video
+        this.isShowVideo = true
+      }
+    },
     // 单选区域图像上传成功触发
     handleASuccess(res, file) {
       this.imageAUrl = URL.createObjectURL(file.raw)
@@ -382,14 +396,15 @@ export default {
     // 取消新增试题
     cancalEdit() {
       this.$parent.editDlvisible = false
+      this.$refs.editQuestionRef.resetFields()
     },
     // 确定新增试题
-    ensureAdd() {
-      this.$refs.addQuestionRef.validate(valid => {
+    submitAdd() {
+      this.$refs.editQuestionRef.validate(valid => {
         if (!valid) {
           return this.$message.warning('请完善试题信息')
         } else {
-          questionAdd(this.editQuestionForm).then(res => {
+          questionEdit(this.editQuestionForm).then(res => {
             console.log('新增表单成功', res)
             if (res.code === 200) {
               this.$message.success('新增试题成功！')

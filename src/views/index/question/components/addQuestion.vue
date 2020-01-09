@@ -42,7 +42,6 @@
             v-model="addQuestionForm.city"
             :options="cityOptions"
             :props="{ expandTrigger: 'hover' }"
-            @change="handleChange"
           ></el-cascader>
         </el-form-item>
         <el-form-item label="题型" prop="type">
@@ -210,8 +209,8 @@
         </el-form-item>
         <el-divider></el-divider>
         <!-- 答案解析区域 -->
-        <el-form-item label="答案解析" prop="asnwer_analyze"></el-form-item>
-        <quill-editor v-model="addQuestionForm.asnwer_analyze"></quill-editor>
+        <el-form-item label="答案解析" prop="answer_analyze"></el-form-item>
+        <quill-editor v-model="addQuestionForm.answer_analyze"></quill-editor>
         <el-divider class="divider"></el-divider>
         <!-- 试题备注区域 -->
         <el-form-item label="试题备注" prop="remark">
@@ -296,7 +295,7 @@ export default {
         // 简单
         short_answer: [{ required: true, message: '请输入简答内容', trigger: 'blur' }],
         // 答案解析
-        asnwer_analyze: [{ required: true, message: '请填写答案解析', trigger: 'blur' }],
+        answer_analyze: [{ required: true, message: '请填写答案解析', trigger: 'blur' }],
         // 试题备注
         remark: [{ required: true, message: '请输入试题备注', trigger: 'blur' }]
       },
@@ -316,8 +315,6 @@ export default {
     }
   },
   methods: {
-    // 城市级联选择器选线改变时触发
-    handleChange() {},
     // 单选区域图像上传成功触发
     handleASuccess(res, file) {
       this.imageAUrl = URL.createObjectURL(file.raw)

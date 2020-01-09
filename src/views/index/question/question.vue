@@ -108,7 +108,7 @@
         <el-table-column prop="reads" label="访问量"></el-table-column>
         <el-table-column label="操作">
           <template slot-scope="scope">
-            <el-button type="text">编辑</el-button>
+            <el-button type="text" @click="editQuestion(scope.row)">编辑</el-button>
             <el-button
               type="text"
               @click="changeStatus(scope.row)"
@@ -132,21 +132,25 @@
     </el-card>
     <!-- 新增试题对话框组件 -->
     <add-question></add-question>
+    <!-- 编辑试题对话框组件 -->
+    <edit-qeustion ref="editQuestionRef"></edit-qeustion>
   </div>
 </template>
 
 <script>
 // 导入新增试题组件
 import addQuestion from './components/addQuestion.vue'
+import editQuestion from './components/editQuestion.vue'
 import { questionList, questionRemove, questionStatus } from '@/api/question.js'
 // 导入subject
 import { subjectList } from '@/api/subject.js'
 // 导入enterprise
 import { enterpriseList } from '@/api/enterprise.js'
 export default {
-  name: 'add-question',
+  name: 'question',
   components: {
-    'add-question': addQuestion
+    'add-question': addQuestion,
+    'edit-qeustion': editQuestion
   },
   data() {
     return {
@@ -218,6 +222,17 @@ export default {
     // 新增题库按钮
     addQuestionBtn() {
       this.addDlvisible = true
+    },
+    // 编辑题库按钮
+    editQuestion(row) {
+      this.editDlvisible = true
+      console.log('编辑试题结果：', row)
+      let editForm = JSON.parse(JSON.stringify(row))
+      // 多选项需要传入一个数组，因返回的多选中是一个字符串，需转换为数组
+      editForm.multiple_select_answer = editForm.multiple_select_answer.split(',')
+      // 城市也是需要传入一个数组，返回的城市是一个字符串，需转换为数组
+      editForm.city = editForm.city.split(',')
+      this.$refs.editQuestionRef.editQuestionForm = editForm
     },
     // 删除题型按钮
     async removeQuestion(row) {
